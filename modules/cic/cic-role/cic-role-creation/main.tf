@@ -44,6 +44,7 @@ resource "tencentcloud_identity_center_role_configuration_permission_policy_atta
   zone_id               = var.zone_id
   role_configuration_id = each.value.role_id
   role_policy_id        = lookup(local.policy_map, each.value.policy, each.value.policy)
+  role_policy_name      = each.value.policy // fix API new bug， must include policy name
 }
 
 resource "tencentcloud_identity_center_role_configuration_permission_custom_policies_attachment" "attachments" {
