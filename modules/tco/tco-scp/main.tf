@@ -8,7 +8,8 @@ locals {
 resource "tencentcloud_organization_org_manage_policy" "org_manage_policy" {
   count = var.create ? 1 : 0
   name        = local.policy_name # "FullAccessPolicy"
-  content     = var.content # "{\"version\":\"2.0\",\"statement\":[{\"effect\":\"allow\",\"action\":\"*\",\"resource\":\"*\"}]}"
+  # content     = var.content # "{\"version\":\"2.0\",\"statement\":[{\"effect\":\"allow\",\"action\":\"*\",\"resource\":\"*\"}]}"
+  content      = replace(jsonencode(jsondecode(var.content)), "/", "\\/") // update for terraform state diff with white spaces
   type        = var.type # "SERVICE_CONTROL_POLICY"
   description = var.description # "Full access policy"
 }
