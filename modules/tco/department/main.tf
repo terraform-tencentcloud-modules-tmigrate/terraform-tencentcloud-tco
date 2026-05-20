@@ -7,11 +7,12 @@ locals {
 
   l2_node_list = flatten(
     [
-      for l1_k, l1 in var.l1_org_nodes: [
-        for l2_k, l2 in try(l1.sub_nodes, {}): merge(l2, {
-          l1_k: l1_k,
-          k: format("%s-%s", l1_k, l2_k)
-        })
+      for l1_k, l2_list in var.l1_org_nodes: [
+        for l2_name in l2_list: {
+          l1_k = l1_k
+          k    = l2_name
+          name = l2_name
+        }
       ] if var.create
     ]
   )
@@ -23,9 +24,10 @@ locals {
 
 resource "tencentcloud_organization_org_node" "l1_nodes" {
   for_each = local.l1_nodes
-  name           = each.value.name
+  name           = each.key
   parent_node_id = var.root_id
   remark         = try(each.value.remark, "")
+  tags           = try(each.value.tags, {})
 }
 
 resource "tencentcloud_organization_org_node" "l2_nodes" {
@@ -33,6 +35,7 @@ resource "tencentcloud_organization_org_node" "l2_nodes" {
   name           = each.value.name
   parent_node_id = local.l1_node_ids[each.value.l1_k]
   remark         = try(each.value.remark, "")
+  tags           = try(each.value.tags, {})
 }
 
 resource "tencentcloud_organization_org_node" "discrete_nodes" {
@@ -40,4 +43,5 @@ resource "tencentcloud_organization_org_node" "discrete_nodes" {
   name           = each.value.name
   parent_node_id = each.value.parent_node_id
   remark         = try(each.value.remark, "")
+  tags           = try(each.value.tags, {})
 }
