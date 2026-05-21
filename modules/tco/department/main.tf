@@ -7,11 +7,13 @@ locals {
 
   l2_node_list = flatten(
     [
-      for l1_k, l2_list in var.l1_org_nodes: [
-        for l2_name in l2_list: {
-          l1_k = l1_k
-          k    = l2_name
-          name = l2_name
+      for l1_k, l1 in var.l1_org_nodes: [
+        for l2_k, l2 in try(l1.sub_nodes, {}): {
+          "l1_k"   = l1_k
+          "k"      = l2_k
+          "name"   = try(l2.name, l2_k)
+          "remark" = try(l2.remark, "")
+          "tags"   = try(l2.tags, {})
         }
       ] if var.create
     ]
@@ -24,7 +26,7 @@ locals {
 
 resource "tencentcloud_organization_org_node" "l1_nodes" {
   for_each = local.l1_nodes
-  name           = each.key
+  name           = try(each.value.name, each.key)
   parent_node_id = var.root_id
   remark         = try(each.value.remark, "")
   tags           = try(each.value.tags, {})
