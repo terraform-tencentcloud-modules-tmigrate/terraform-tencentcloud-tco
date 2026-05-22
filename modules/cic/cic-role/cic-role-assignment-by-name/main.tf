@@ -23,7 +23,7 @@ resource "tencentcloud_identity_center_role_assignment" "group_assignment" {
   for_each = local.group_assignments
 
   zone_id               = var.zone_id
-  principal_id          = local.group_name_to_id[each.value.principal_name]
+  principal_id          = lookup(local.group_name_to_id, each.value.principal_name, "0")
   principal_type        = "Group"
   target_uin            = each.value.target_uin
   target_type           = each.value.target_type
@@ -35,7 +35,7 @@ resource "tencentcloud_identity_center_role_assignment" "user_assignment" {
   for_each = local.user_assignments
 
   zone_id               = var.zone_id
-  principal_id          = local.user_name_to_id[each.value.principal_name]
+  principal_id          = lookup(local.user_name_to_id, each.value.principal_name, "0")
   principal_type        = "User"
   target_uin            = each.value.target_uin
   target_type           = each.value.target_type

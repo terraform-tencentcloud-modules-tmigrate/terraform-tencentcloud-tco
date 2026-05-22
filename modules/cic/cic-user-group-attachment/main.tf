@@ -23,8 +23,8 @@ locals {
       for g_name, user_names in var.group_user_map : [
         for u_name in user_names : {
           key      = format("%s-%s", g_name, u_name)
-          group_id = local.group_ids[g_name]
-          user_id  = local.user_ids[u_name]
+          group_id = lookup(local.group_ids, g_name, "0")
+          user_id  = lookup(local.user_ids, u_name, "0")
         }
       ]
     ]) : obj.key => obj
