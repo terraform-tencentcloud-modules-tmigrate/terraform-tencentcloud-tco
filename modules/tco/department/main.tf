@@ -8,7 +8,7 @@ locals {
   l2_node_list = flatten(
     [
       for l1_k, l1 in var.l1_org_nodes: [
-        for l2_k, l2 in try(l1.sub_nodes, {}): {
+        for l2_k, l2 in (l1.sub_nodes != null ? l1.sub_nodes : {}): {
           "l1_k"   = l1_k
           "k"      = l2_k
           "name"   = try(l2.name, l2_k)
