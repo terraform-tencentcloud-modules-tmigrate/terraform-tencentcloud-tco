@@ -21,6 +21,24 @@ locals {
   l2_nodes = { for l2 in local.l2_node_list: l2.k => l2 }
   l2_node_ids = { for k, node in tencentcloud_organization_org_node.l2_nodes: k => node.id }
 
+  l3_node_list = flatten(
+    [
+      for l1_k, l1 in var.l1_org_nodes: [
+        for l2_k, l2 in (try(l1.sub_nodes, null) != null ? l1.sub_nodes : {}): [
+          for l3_k, l3 in (try(l2.sub_nodes, null) != null ? l2.sub_nodes : {}): {
+            "l2_k"   = l2_k
+            "k"      = l3_k
+            "name"   = try(l3.name, l3_k)
+            "remark" = try(l3.remark, "")
+            "tags"   = try(l3.tags, {})
+          }
+        ]
+      ] if var.create
+    ]
+  )
+  l3_nodes = { for l3 in local.l3_node_list: l3.k => l3 }
+  l3_node_ids = { for k, node in tencentcloud_organization_org_node.l3_nodes: k => node.id }
+
   discrete_node_ids = { for k, node in tencentcloud_organization_org_node.discrete_nodes: k => node.id}
 }
 
@@ -36,6 +54,14 @@ resource "tencentcloud_organization_org_node" "l2_nodes" {
   for_each = local.l2_nodes
   name           = each.value.name
   parent_node_id = local.l1_node_ids[each.value.l1_k]
+  remark         = try(each.value.remark, "")
+  tags           = try(each.value.tags, {})
+}
+
+resource "tencentcloud_organization_org_node" "l3_nodes" {
+  for_each = local.l3_nodes
+  name           = each.value.name
+  parent_node_id = local.l2_node_ids[each.value.l2_k]
   remark         = try(each.value.remark, "")
   tags           = try(each.value.tags, {})
 }
